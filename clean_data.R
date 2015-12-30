@@ -35,7 +35,7 @@ abline(v = dat$low_income_families[which(dat$neighbourhood == "Malvern")],
        col = "red")
 summary(dat$low_income_families)
 
-## make new variable of percent of total population that is low income
+## make new variable of percent of total population that is low income families
 dat$per_low_family <- (dat$low_income_families/dat$total_population)*100
 
 # round to nearest 10th
@@ -48,3 +48,34 @@ dat$cat_low_family <- ifelse(dat$per_low_family > 13.06, "poor",
                              ifelse(dat$per_low_family > 8.235 & 
                                       dat$per_low_family <= 13.06, "medium", "rich"))
 
+## make variable for percentage of total population that is low income
+dat$per_low_population <- (dat$low_income_population/dat$total_population)*100
+dat$per_low_population <- round(dat$per_low_population, 2)
+
+## create new categorical variable based on dat$per_low_population
+dat$cat_low_population <- ifelse(dat$per_low_population > 27.10, "poor",
+                                 ifelse(dat$per_low_population > 14.16 &
+                                      dat$per_low_population <= 27.10, "medium","rich"))
+
+## make variable for percentage pf visible minority
+dat$per_vis_min <- (dat$visible_minority_category/dat$total_population)*100
+dat$per_vis_min <- round(dat$per_vis_min, 2) 
+
+## create category for visible minority in neighbourhoods
+dat$cat_vis_min <- ifelse(dat$per_vis_min > 63.50, "high",
+                          ifelse(dat$per_vis_min > 25.21 & 
+                                   dat$per_vis_min <= 63.5, "medium", "low"))
+
+## make variable for assaults per capita in each neighbourhood
+dat$assaults_per_cap <- (dat$assaults/dat$total_population)*100
+dat$assaults_per_cap <- round(dat$assaults_per_cap, 2)
+
+## explore average income
+summary(dat$average_family_income)
+hist(dat$average_family_income)
+
+## create categories of income by neighbourhood
+dat$cat_avg_income <- ifelse(dat$average_family_income > 92800, "high",
+                             ifelse(dat$average_family_income > 65840 &
+                                      dat$average_family_income <= 92800,"medium",
+                                    "low"))
