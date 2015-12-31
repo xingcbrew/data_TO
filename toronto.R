@@ -18,8 +18,8 @@ library(gtrendsR)
 library(dplyr)
 
 ## Set up google trends
-usr <- "xingchiu2@gmail.com"
-psw <- "h3yxing24"
+usr <- "<username>"
+psw <- "<password>"
 ch <- gconnect(usr, psw) 
 
 ##  mayor <- gtrends(c("data is", "data are"), res="day")
