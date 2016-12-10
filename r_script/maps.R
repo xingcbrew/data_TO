@@ -63,13 +63,16 @@ map_f <- fortify(map)
 map$id <- row.names(map)
 
 # join fortified map_f with map
-map_f <- left_join(map_f, dat1)
+map_f <- left_join(map_f, map@data)
+
+# disable scientific notation
+options(scipen = 999)
 
 ###
 ###
 
 # load ttc map and fortify to make data.frame
-ttc <- shapefile("/Users/xing/Documents/data_TO/ttc/subway_wgs84.shp")
+ttc <- shapefile("/Users/xing/Documents/data_TO/maps/ttc/subway_wgs84.shp")
 ttc_f <- fortify(ttc)
 
 # load NIAs and fortify to make data.frame
@@ -197,10 +200,14 @@ shelters$capcitycat <- ifelse(shelters$CAPACITY > 0 & shelters$CAPACITY < 30, "A
 colnames(shelters)[colnames(shelters)=="coords.x1"] <- "long"
 colnames(shelters)[colnames(shelters)=="coords.x2"] <- "lat"
 
+# to show colour gradient better, bunch all fam_income about 250000 together
+map_f$fam_income_limit <- ifelse(map_f$avg_fam_income > 250000, 250000, map_f$avg_fam_income)
+
+# super map!
 ggplot() +
   geom_polygon(data = map_f, 
-               aes(x = long, y = lat, group = group),
-               color = "transparent", alpha = 0.5) + 
+               aes(x = long, y = lat, group = group, fill = fam_income_limit), 
+               color = "transparent", size = 0.25) + 
   geom_polygon(data = nia_f, 
                aes(x = long, y = lat, group = group),
                color = "yellow", fill = "transparent") +
@@ -208,10 +215,15 @@ ggplot() +
              aes(x = long, y = lat, size = capcitycat, color = TYPE2)) +
   geom_point(data = places, # add ywca locations
              aes(x = long, y = lat), 
-             color = "orange", alpha = 0.4, size = 3) +
-  geom_text(data = places, aes(long, lat, label = place_name), size = 4) +
+             size = 3, shape = 2) +
+  geom_path(data = ttc_f,
+            aes(x = long, y = lat, group = group), alpha = 0.5) +
+  geom_text(data = places, aes(long, lat, label = place_name), size = 4, hjust = 0, vjust = 1.2) +
+  scale_fill_distiller(name = "Average Family Income", palette = 1, trans = "reverse") +
+  scale_color_hue("Shelter Type") +
+  scale_size_discrete("Shelter Capacity", labels = c("Small <30", "Medium 60-100", "Large 100+")) +
   theme_nothing(legend = TRUE) +
-  ggtitle("Toronto Shelter Locations")
+  ggtitle("Shelter Locations in Toronto")
 
 ##
 ##
