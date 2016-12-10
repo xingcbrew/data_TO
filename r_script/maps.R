@@ -3,11 +3,11 @@ library(dplyr)
 library(reshape2)
 library(ggmap)
 library(rgdal)
-# library(rgeos)
+library(rgeos)
 library(maptools)
 library(tidyr)
-# library(tmap)
-# library(raster)
+library(tmap)
+library(raster) #to read in shapefile
 library(sp)
 
 #set working directory
@@ -63,7 +63,7 @@ map_f <- fortify(map)
 map$id <- row.names(map)
 
 # join fortified map_f with map
-map_f <- left_join(map_f, map@data)
+map_f <- left_join(map_f, dat1)
 
 ###
 ###
@@ -174,3 +174,50 @@ ggplot() +
                        trans = "reverse") +
   theme_nothing(legend = TRUE) +
   ggtitle("Plotting Points on Map")
+
+### loading shelter location points 
+
+# change shelters into data.frame and then rename long and lat as needed
+
+shelters <- shapefile("/Users/xing/Documents/data_TO/maps/shelters/shelters_wgs84.shp")
+shelters <- as.data.frame(shelters)
+
+# clean shelters data.frame 
+# delete uneeded columns
+shelters <- shelters[, -c(1:13)] # delete columns 5 through 7
+
+# make capacity categories 
+shelters$CAPACITY <- ifelse(shelters$CAPACITY == "VARIES", 0, shelters$CAPACITY)
+
+shelters$capcitycat <- ifelse(shelters$CAPACITY > 0 & shelters$CAPACITY < 30, "Asmall(<30)",
+                              ifelse(shelters$CAPACITY > 30 & shelters$CAPACITY < 60, "Bmed(31-60)",
+                                     ifelse(shelters$CAPACITY > 60 & 
+                                              shelters$CAPACITY < 100, "61-100", "Clarge(100+)")))
+
+colnames(shelters)[colnames(shelters)=="coords.x1"] <- "long"
+colnames(shelters)[colnames(shelters)=="coords.x2"] <- "lat"
+
+ggplot() +
+  geom_polygon(data = map_f, 
+               aes(x = long, y = lat, group = group),
+               color = "transparent", alpha = 0.5) + 
+  geom_polygon(data = nia_f, 
+               aes(x = long, y = lat, group = group),
+               color = "yellow", fill = "transparent") +
+  geom_point(data = shelters, 
+             aes(x = long, y = lat, size = capcitycat, color = TYPE2)) +
+  geom_point(data = places, # add ywca locations
+             aes(x = long, y = lat), 
+             color = "orange", alpha = 0.4, size = 3) +
+  geom_text(data = places, aes(long, lat, label = place_name), size = 4) +
+  theme_nothing(legend = TRUE) +
+  ggtitle("Toronto Shelter Locations")
+
+##
+##
+##
+
+#### using ggmaps ###
+toronto <- get_map(location = c(long = -79.38318, lat = 43.65323))
+ggmap(toronto)
+
