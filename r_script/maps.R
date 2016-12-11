@@ -182,23 +182,24 @@ ggplot() +
 
 # change shelters into data.frame and then rename long and lat as needed
 
-shelters <- shapefile("/Users/xing/Documents/data_TO/maps/shelters/shelters_wgs84.shp")
-shelters <- as.data.frame(shelters)
-
+#shelters <- shapefile("/Users/xing/Documents/data_TO/maps/shelters/shelters_wgs84.shp")
+#shelters <- as.data.frame(shelters)
 # clean shelters data.frame 
-# delete uneeded columns
-shelters <- shelters[, -c(1:13)] # delete columns 5 through 7
-
 # make capacity categories 
-shelters$CAPACITY <- ifelse(shelters$CAPACITY == "VARIES", 0, shelters$CAPACITY)
+# shelters$CAPACITY <- ifelse(shelters$CAPACITY == "VARIES", 0, shelters$CAPACITY)
+# delete uneeded columns 
+# shelters <- shelters[, -c(1:13)] # delete columns 5 through 7
+# colnames(shelters)[colnames(shelters)=="coords.x1"] <- "long"
+# colnames(shelters)[colnames(shelters)=="coords.x2"] <- "lat"
+#write.csv(shelters, file = "shelters.csv")
 
-shelters$capcitycat <- ifelse(shelters$CAPACITY > 0 & shelters$CAPACITY < 30, "Asmall(<30)",
-                              ifelse(shelters$CAPACITY > 30 & shelters$CAPACITY < 60, "Bmed(31-60)",
-                                     ifelse(shelters$CAPACITY > 60 & 
-                                              shelters$CAPACITY < 100, "61-100", "Clarge(100+)")))
+#load new data csv
+shelters <- read.csv("/Users/xing/Documents/data_TO/data/shelters.csv")
 
-colnames(shelters)[colnames(shelters)=="coords.x1"] <- "long"
-colnames(shelters)[colnames(shelters)=="coords.x2"] <- "lat"
+shelters$capacitycat <- ifelse(shelters$capacity > 0 & shelters$capacity < 30, "A.small(<30)",
+                              ifelse(shelters$capacity > 30 & shelters$capacity < 60, "B.med(31-60)",
+                                     ifelse(shelters$capacity > 60 & shelters$capacity < 100, "C.large(61-100)", 
+                                           "D.very large(100+)")))
 
 # to show colour gradient better, bunch all fam_income about 250000 together
 map_f$fam_income_limit <- ifelse(map_f$avg_fam_income > 250000, 250000, map_f$avg_fam_income)
@@ -212,7 +213,7 @@ ggplot() +
                aes(x = long, y = lat, group = group),
                color = "yellow", fill = "transparent") +
   geom_point(data = shelters, 
-             aes(x = long, y = lat, size = capcitycat, color = TYPE2)) +
+             aes(x = long, y = lat, size = capacitycat, color = type)) +
   geom_point(data = places, # add ywca locations
              aes(x = long, y = lat), 
              size = 3, shape = 2) +
@@ -221,7 +222,7 @@ ggplot() +
   geom_text(data = places, aes(long, lat, label = place_name), size = 4, hjust = 0, vjust = 1.2) +
   scale_fill_distiller(name = "Average Family Income", palette = 1, trans = "reverse") +
   scale_color_hue("Shelter Type") +
-  scale_size_discrete("Shelter Capacity", labels = c("Small <30", "Medium 60-100", "Large 100+")) +
+  scale_size_discrete("Shelter Capacity", labels = c("Small <30", "Medium 30-60", "Large 60-100", "Very large 100+")) +
   theme_nothing(legend = TRUE) +
   ggtitle("Shelter Locations in Toronto")
 
@@ -241,11 +242,11 @@ ggmap(toronto)
 library(leaflet)
 
 # make colour palette
-pal <- colorFactor(c("blue", "red", "green", "orange", "yellow"), domain = c("Single Men", "Single Women", 
+pal <- colorFactor(c("blue", "red", "purple", "orange", "yellow"), domain = c("Single Men", "Single Women", 
                                                                              "Mixed Adult", "Family", "Youth"))
 
 # pop-up information
-lab <- paste(shelters$NAME, shelters$CAPACITY, sep = ", ")
+lab <- paste(shelters$name, shelters$phone, shelters$capacity, sep = " | ")
 
 # turn ywca places into spatialobject
 
@@ -254,14 +255,14 @@ m <- leaflet(data = shelters) %>% setView(lng = -79.38318, lat= 43.65323, zoom =
 
 m %>% addProviderTiles("Stamen.Toner", options = providerTileOptions(opacity = 0.35)) %>%
   addCircleMarkers(~long, ~lat, popup = ~as.character(lab),
-                   radius = ~ifelse(CAPACITY > 0 & CAPACITY < 50, 6, 10),
+                   radius = ~ifelse(capacity > 0 & capacity < 30, 5, 
+                                    ifelse(capacity > 31 & capacity < 60, 8, 10)),
                    stroke = FALSE, fillOpacity = 0.5,
-                   color = ~pal(TYPE2)) %>%
-  addMarkers(data = places, ~long, ~lat, popup = ~as.character(place_name),
-             radius = 5, fillOpacity = 0.5, color = blue) %>%
-  addLegend("bottomright", pal = pal, values = shelters$TYPE2,
+                   color = ~pal(type)) %>%
+  addLegend("bottomright", pal = pal, values = shelters$type,
             title = "Type of Shelter",
             opacity = 0.5)
+
 # add clusterOptions = markerClusterOptions() if want to cluster
 
-
+library(mapview)
