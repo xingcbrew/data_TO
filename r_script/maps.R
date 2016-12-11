@@ -233,3 +233,35 @@ ggplot() +
 toronto <- get_map(location = c(long = -79.38318, lat = 43.65323))
 ggmap(toronto)
 
+##
+##
+##
+
+## using leaflet
+library(leaflet)
+
+# make colour palette
+pal <- colorFactor(c("blue", "red", "green", "orange", "yellow"), domain = c("Single Men", "Single Women", 
+                                                                             "Mixed Adult", "Family", "Youth"))
+
+# pop-up information
+lab <- paste(shelters$NAME, shelters$CAPACITY, sep = ", ")
+
+# turn ywca places into spatialobject
+
+
+m <- leaflet(data = shelters) %>% setView(lng = -79.38318, lat= 43.65323, zoom = 12)
+
+m %>% addProviderTiles("Stamen.Toner", options = providerTileOptions(opacity = 0.35)) %>%
+  addCircleMarkers(~long, ~lat, popup = ~as.character(lab),
+                   radius = ~ifelse(CAPACITY > 0 & CAPACITY < 50, 6, 10),
+                   stroke = FALSE, fillOpacity = 0.5,
+                   color = ~pal(TYPE2)) %>%
+  addMarkers(data = places, ~long, ~lat, popup = ~as.character(place_name),
+             radius = 5, fillOpacity = 0.5, color = blue) %>%
+  addLegend("bottomright", pal = pal, values = shelters$TYPE2,
+            title = "Type of Shelter",
+            opacity = 0.5)
+# add clusterOptions = markerClusterOptions() if want to cluster
+
+
