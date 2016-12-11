@@ -41,9 +41,9 @@ map <- shapefile("/Users/xing/Documents/data_TO/maps/NEIGHBORHOODS_WGS84.shp")
 
 # understand shapefile data
 head(map) 
-plot(map)
-map@data
-names(map)
+# plot(map)
+# map@data
+# names(map)
 
 # remove numbers, special characters, and spaces in neighbourhood area names
 map$AREA_NAME <- gsub("[[:punct:]]", "", map$AREA_NAME)
@@ -216,7 +216,7 @@ ggplot() +
              aes(x = long, y = lat, size = capacitycat, color = type)) +
   geom_point(data = places, # add ywca locations
              aes(x = long, y = lat), 
-             size = 3, shape = 2) +
+             size = 3, shape = 10) +
   geom_path(data = ttc_f,
             aes(x = long, y = lat, group = group), alpha = 0.5) +
   geom_text(data = places, aes(long, lat, label = place_name), size = 4, hjust = 0, vjust = 1.2) +
@@ -227,6 +227,21 @@ ggplot() +
   ggtitle("Shelter Locations in Toronto")
 
 ##
+
+map_f$percent_low_income <- ifelse(map_f$percent_low_income > 60, 31, map_f$percent_low_income)
+nnames <- aggregate(cbind(long, lat) ~ neighbourhood, data = map_f, FUN=function(x) mean(range(x)))
+
+ggplot() +
+  geom_polygon(data = map_f, 
+              aes(x = long, y = lat, group = group, fill = percent_low_income), 
+              color = "transparent", size = 0.25) +
+  scale_fill_distiller(name = "Percent Low Income", palette = 3, trans = "reverse") +
+  geom_path(data = ttc_f,
+            aes(x = long, y = lat, group = group), alpha = 0.5) +
+  theme_nothing(legend = TRUE) +
+  geom_text(data = nnames, aes(long, lat, label = neighbourhood), size = 2) +
+  ggtitle("Neighbourhoods by Percentage of Low Income People")
+
 ##
 ##
 
@@ -246,14 +261,12 @@ pal <- colorFactor(c("blue", "red", "purple", "orange", "yellow"), domain = c("S
                                                                              "Mixed Adult", "Family", "Youth"))
 
 # pop-up information
-lab <- paste(shelters$name, shelters$phone, shelters$capacity, sep = " | ")
-
-# turn ywca places into spatialobject
+lab <- paste(shelters$name, shelters$phone, shelters$address, sep = " | ")
 
 
 m <- leaflet(data = shelters) %>% setView(lng = -79.38318, lat= 43.65323, zoom = 12)
 
-m %>% addProviderTiles("Stamen.Toner", options = providerTileOptions(opacity = 0.35)) %>%
+shelters_map <- m %>% addProviderTiles("Stamen.Toner", options = providerTileOptions(opacity = 0.35)) %>%
   addCircleMarkers(~long, ~lat, popup = ~as.character(lab),
                    radius = ~ifelse(capacity > 0 & capacity < 30, 5, 
                                     ifelse(capacity > 31 & capacity < 60, 8, 10)),
@@ -265,4 +278,10 @@ m %>% addProviderTiles("Stamen.Toner", options = providerTileOptions(opacity = 0
 
 # add clusterOptions = markerClusterOptions() if want to cluster
 
-library(mapview)
+# map for ywca locations using leaflet plus other shelters
+ywca <- paste(places$place_name)
+n <- leaflet(data = places) %>% setView(lng = -79.38318, lat= 43.65323, zoom = 10)
+n %>% addProviderTiles("Stamen.Toner", options = providerTileOptions(opacity = 0.5)) %>%
+  addMarkers(~long, ~lat, popup = ~as.character(ywca)) %>%
+  addCircleMarkers(shelters$long, shelters$lat, popup = as.character(lab))
+  
