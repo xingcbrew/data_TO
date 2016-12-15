@@ -258,6 +258,7 @@ ggmap(toronto)
 ##
 ##
 ##
+##
 
 ## using leaflet
 library(leaflet)

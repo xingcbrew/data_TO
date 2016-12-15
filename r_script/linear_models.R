@@ -49,6 +49,21 @@ ggplot(dat1, aes(x=road_kms, y=traffic_collisions)) +
   ylab('Traffic Collisions') + 
   ggtitle("Road Kilometers vs. Traffic Collisions")
 
+## make new data frame where remove outlier from vehicle thefts
+dat2 <- dat1[dat1$vehicle_thefts < 200,]
+
+ggplot(dat2, aes(x=vehicle_thefts, y=traffic_collisions)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method=lm) +
+  labs("Total Area", "Traffic Collisions") +
+  ggtitle("Area v. Collisions")
+
+ggplot(dat2, aes(x=total_population, y=vehicle_thefts)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth() +
+  labs("Total Pop", "Veh Thefts") +
+  ggtitle("Pop vs Thefts")
+
+
 # multivariate lineaar regressions using lm function
-mod1 <- lm(traffic_collisions ~ road_kms + total_population + lone_parent_families + 
-            vehicle_thefts + walk_score, data = dat1)
+mod1 <- lm(traffic_collisions ~ total_area + vehicle_thefts + avg_fam_income, data = dat1)
