@@ -157,7 +157,7 @@ ggplot() +
 ggsave("map3.png")
 
 # adding other points to the map
-places <- read.csv("/Users/xing/Documents/data_TO/data/places.csv")
+ywca <- read.csv("/Users/xing/Documents/data_TO/data/ywca.csv")
 
 ggplot() +
   geom_polygon(data = map_f, 
@@ -168,15 +168,15 @@ ggplot() +
                color = "yellow", fill = "transparent") +
   geom_path(data = ttc_f,
             aes(x = long, y = lat, group = group)) +
-  geom_point(data = places,
+  geom_point(data = ywca,
              aes(x = long, y = lat), 
              color = "orange", alpha = 0.6, size = 3) +
-  geom_text(data = places, aes(long, lat, label = place_name), size = 4) +
+  geom_text(data = ywca, aes(long, lat, label = place_name), size = 4) +
   coord_map() +
   scale_fill_distiller(name = "Lone Parent Families", palette = 2, # choose colour scheme using palette
                        trans = "reverse") +
   theme_nothing(legend = TRUE) +
-  ggtitle("Plotting Points on Map")
+  ggtitle("YWCA Locations")
 
 ### loading shelter location points 
 
@@ -244,6 +244,12 @@ ggplot() +
 
 ##
 ##
+
+## add a scale bar and north sign ##
+library(ggsn)
+map3 +
+  north(map_f, symbol = 12) +
+  scalebar(map_f, dist = 2.5, dd2km = TRUE, model = 'WGS84')
 
 #### using ggmaps ###
 toronto <- get_map(location = c(long = -79.38318, lat = 43.65323))
