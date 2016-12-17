@@ -64,24 +64,40 @@ map <- shapefile("/Users/xing/Documents/data_TO/maps/NEIGHBORHOODS_WGS84.shp")
 # rename neighbourhood_id to match maps in order to join
 names(n)[names(n) == 'neighbourhood_id'] <- "AREA_S_CD"
 
-# left_join dat1 to map 
+# left_join dat1 to map
 map@data <- left_join(map@data, n)
 
 ### to change map data into data.frame, use fortify() eg., map <- fortify(map)
 map_f <- fortify(map)
 
-# create a row with row ids in map so that can join with map_f (data.frame)
-map$id <- row.names(map)
+# create a col with row ids in map so that can join with map_f (data.frame)
+map$id <- row.names(n)
 
 # join fortified map_f with map
 map_f <- left_join(map_f, map@data)
 
-# make map
+##
 
-cols = rainbow(35, s=.6, v=.8, alpha=0.6)[sample(1:35,35)]
+###### dissolve neighbourhoods into districts #####
+dis <- raster::aggregate(map, 'district')
 
-ggplot() +
-  geom_polygon(data = map_f, 
-               aes(x = long, y = lat, group = group, fill = district), 
-               color = "transparent", size = 0.25) + 
-  scale_fill_manual(values = cols)
+# join dat1 to map
+dis@data <- left_join(dis@data, dat1)
+
+# fortify dis map
+dis_f <- fortify(dis)
+
+# create col with row ids to join 
+dis$id <- row.names(dat1)
+
+# join dis_f with dis
+dis_f <- left_join(dis_f, dis@data)
+
+# make thematic map of housing prices by district
+ggplot() + 
+  geom_polygon(data = dis_f,
+               aes(x=long, y = lat, group = group, fill = dec_2012),
+               color="transparent", size=0.25) +
+  scale_fill_distiller(name = "House Prices", palette = 1, trans = "reverse") +
+  theme_nothing(legend=T) 
+
