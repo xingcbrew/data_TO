@@ -99,7 +99,7 @@ plot + geom_point(aes(colour = home_price, size = total_population)) +
 
 ###### making a map using ggplot2 #####
 
-map3 <- ggplot(map_f, aes(long, lat, group = group, fill = total_population)) +
+map3 <- ggplot(map_f, aes(long, lat, group = group, fill = vehicle_thefts)) +
   geom_polygon() +
   theme_nothing(legend = T) + # if you want to have just the map with nothing else, plus legend
   scale_fill_distiller(name = "Population", trans = "reverse") +
@@ -165,18 +165,19 @@ ggplot() +
                color = "transparent", size = 0.25) + 
   geom_polygon(data = nia_f, 
                aes(x = long, y = lat, group = group),
-               color = "yellow", fill = "transparent") +
+               color = "yellow", fill = "transparent",
+               show.legend = T) +
   geom_path(data = ttc_f,
             aes(x = long, y = lat, group = group)) +
   geom_point(data = ywca,
              aes(x = long, y = lat), 
              color = "orange", alpha = 0.6, size = 3) +
-  geom_text(data = ywca, aes(long, lat, label = place_name), size = 4) +
+  geom_text(data = ywca, aes(long, lat, label = place_name), size = 3, nudge_y = .005) +
   coord_map() +
-  scale_fill_distiller(name = "Lone Parent Families", palette = 2, # choose colour scheme using palette
+  scale_fill_distiller(name = "Lone Parent Families", palette = 1, # choose colour scheme using palette
                        trans = "reverse") +
   theme_nothing(legend = TRUE) +
-  ggtitle("YWCA Locations")
+  ggtitle("YWCA Toronto Locations")
 
 ### loading shelter location points 
 
