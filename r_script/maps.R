@@ -154,7 +154,7 @@ ggplot() +
   labs(title="Low Income")
 
 # to save map, use ggsave
-ggsave("map3.png")
+# ggsave("map3.png")
 
 # adding other points to the map
 ywca <- read.csv("/Users/xing/Documents/data_TO/data/ywca.csv")
@@ -176,6 +176,7 @@ ggplot() +
   coord_map() +
   scale_fill_distiller(name = "Lone Parent Families", palette = 1, # choose colour scheme using palette
                        trans = "reverse") +
+  scale_color_manual(name="NIAs", values = "yellow") +
   theme_nothing(legend = TRUE) +
   ggtitle("YWCA Toronto Locations")
 

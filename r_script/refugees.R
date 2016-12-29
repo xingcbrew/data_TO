@@ -64,7 +64,12 @@ ggplot(dat_year, aes(x=variable, y=cumsum)) +
   theme_fivethirtyeight()
 
 # make bar plot showing level of education of refugees by year
-ggplot(data = dat2_m, aes(x=variable, y=value, fill=education)) +
+# first, relevel education from least to most education
+dat2_m$education <- factor(dat2_m$education, levels = c("None ","Secondary or Less", "Formal Trade Cert. or Apprenticeship",
+                           "Non-University Certificate or Diploma", "Some University - No Degree","Bachelor's Degree",
+                           "Some Post-Grad. Education - No Degree", "Master's Degree", "Doctorate", "Unknown"))
+
+ggplot(data = dat2_m[order(dat2_m$education),], aes(x=variable, y=value, fill=education)) +
   geom_bar(stat="identity") +
   xlab("Year") +
   ylab("Number of Refugees Admitted") +
@@ -99,6 +104,7 @@ r_tot$value <- NULL
 r_tot_m <- melt(r_tot, id.vars = "variable")
 colnames(r_tot_m)[1] <- "year"
 
+# plot number of resettled refugees (by gov't program) vs refugee claimants from 2011-2016
 ggplot(r_tot_m, aes(year, value, color=variable)) +
   geom_line() +
   xlab("Year") +
