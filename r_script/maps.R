@@ -263,7 +263,7 @@ ggmap(toronto)
 ##
 
 ## using leaflet
-library(leaflet)
+ library(leaflet)
 
 # make colour palette
 pal <- colorFactor(c("blue", "red", "purple", "orange", "yellow"), domain = c("Single Men", "Single Women", 
